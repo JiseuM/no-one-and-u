@@ -6,7 +6,7 @@
 <meta name="robots" content="noindex, nofollow, noarchive">
 <title>冬月十九</title>
 <style>
-  :root{ --ink:#2b2622; --sub:#8a7f74; --paper:#faf6ef; --line:#e3d9cb; --red:#8c2f22; }
+  :root{ --ink:#2b2622; --sub:#8a7f74; --paper:#faf6ef; --line:#e3d9cb; --red:#8c2f22; --fs:17.5px; }
   *{box-sizing:border-box;-webkit-text-size-adjust:100%}
   body{margin:0;background:#efe8dc;color:var(--ink);font-family:"Songti SC","Songti TC","STSong",Georgia,"Noto Serif SC",serif;}
   .page{max-width:720px;margin:0 auto;background:var(--paper);min-height:100vh;padding:56px 28px 90px;box-shadow:0 0 40px rgba(60,40,20,.08)}
@@ -25,9 +25,38 @@
   h2{margin:0 0 26px;text-align:center;font-weight:600;font-size:17px;letter-spacing:4px;color:var(--red)}
   h2 span{position:relative;padding:0 16px;background:var(--paper)}
   h2:before{content:"";display:block;width:100%;height:1px;background:var(--line);margin-bottom:-12px}
-  p{margin:0 0 1.05em;font-size:17.5px;line-height:2.05;text-indent:2em;text-align:justify;letter-spacing:.3px;word-break:break-word}
+  p{margin:0 0 1.05em;font-size:var(--fs);line-height:2.05;text-indent:2em;text-align:justify;letter-spacing:.3px;word-break:break-word}
   .end{text-align:center;color:var(--sub);font-size:13px;letter-spacing:4px;margin-top:70px}
-  @media (max-width:520px){ .toc ol{columns:1} .page{padding:38px 20px 70px;box-shadow:none} h1{font-size:25px;letter-spacing:4px} p{font-size:17px;line-height:1.95} }
+  @media (max-width:520px){ .toc ol{columns:1} .page{padding:38px 20px 70px;box-shadow:none} h1{font-size:25px;letter-spacing:4px} :root{--fs:18px} p{line-height:1.92} }
+
+  /* 阅读菜单 */
+  .dim{position:fixed;inset:0;background:#000;opacity:0;pointer-events:none;transition:opacity .2s;z-index:25}
+  .mask{position:fixed;inset:0;background:rgba(24,18,12,.4);opacity:0;pointer-events:none;transition:opacity .22s;z-index:40}
+  .mask.on{opacity:1;pointer-events:auto}
+  .menu{position:fixed;left:0;right:0;bottom:0;z-index:50;background:#f7f2e8;border-top:1px solid var(--line);box-shadow:0 -12px 32px rgba(50,32,14,.18);transform:translateY(102%);transition:transform .26s cubic-bezier(.2,.8,.2,1);padding-bottom:env(safe-area-inset-bottom)}
+  .menu.on{transform:none}
+  .panel{display:none;max-height:50vh;overflow:auto;-webkit-overflow-scrolling:touch;padding:20px 24px 8px}
+  .panel.on{display:block}
+  .pt{font-size:12px;color:var(--sub);letter-spacing:3px;margin-bottom:14px}
+  #touchToc{list-style:none;margin:0;padding:0}
+  #touchToc li{margin:0 0 13px}
+  #touchToc a{display:flex;align-items:baseline;color:var(--ink);text-decoration:none;font-size:15px}
+  #touchToc .n{color:var(--red);font-size:12.5px;letter-spacing:1px;width:3.6em;flex:0 0 auto}
+  #touchToc .s{flex:1;border-bottom:1px dotted var(--line);padding-bottom:3px}
+  .fsrow{display:flex;align-items:center;gap:16px;padding:6px 0 14px}
+  .fsrow button{flex:0 0 64px;height:40px;border:1px solid var(--line);background:#fffdf8;color:var(--ink);font-family:inherit;font-size:15px;border-radius:2px;cursor:pointer}
+  .fsrow button:active{background:#f0e8da}
+  .fsrow .val{flex:1;text-align:center;color:var(--sub);font-size:13px;letter-spacing:1px}
+  .fsdemo{color:var(--ink);font-size:var(--fs);line-height:1.9;text-indent:2em;border-top:1px solid var(--line);padding-top:14px}
+  .brrow{display:flex;align-items:center;gap:14px;padding:8px 0 18px}
+  .brrow span{font-size:12px;color:var(--sub);letter-spacing:1px;flex:0 0 auto}
+  .brrow input{flex:1;-webkit-appearance:none;appearance:none;height:2px;background:var(--line);border-radius:2px;outline:none}
+  .brrow input::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--red);border:2px solid #fffdf8;box-shadow:0 1px 4px rgba(0,0,0,.25)}
+  .bar{display:flex;border-top:1px solid var(--line);background:#fffdf8}
+  .bar button{flex:1;background:none;border:0;font-family:inherit;font-size:13px;letter-spacing:3px;color:var(--ink);padding:15px 0 16px;cursor:pointer;position:relative}
+  .bar button+button:before{content:"";position:absolute;left:0;top:16px;bottom:16px;width:1px;background:var(--line)}
+  .bar button.on{color:var(--red)}
+  @media (max-width:520px){ .panel{padding:16px 20px 6px} }
 </style>
 </head>
 <body>
@@ -2800,5 +2829,94 @@
 </section>
   <div class="end">— 完 —</div>
 </div>
+
+<div class="dim" id="dim"></div>
+<div class="mask" id="mask"></div>
+<div class="menu" id="menu" role="dialog" aria-label="阅读菜单">
+  <div class="panel" id="pane-toc"><div class="pt">目 录</div><ol id="touchToc"></ol></div>
+  <div class="panel" id="pane-fs">
+    <div class="pt">字 号</div>
+    <div class="fsrow"><button type="button" id="fsDown">A−</button><div class="val" id="fsVal">17.5</div><button type="button" id="fsUp">A+</button></div>
+    <div class="fsdemo">冬月十九，她坐在窗边，桌上的气球轻轻晃。</div>
+  </div>
+  <div class="panel" id="pane-br">
+    <div class="pt">亮 度</div>
+    <div class="brrow"><span>暗</span><input type="range" id="brRange" min="30" max="100" step="1" value="92"><span>亮</span></div>
+  </div>
+  <div class="bar">
+    <button type="button" data-pane="pane-toc">目录</button>
+    <button type="button" data-pane="pane-fs">字号</button>
+    <button type="button" data-pane="pane-br">亮度</button>
+  </div>
+</div>
+<script>
+(function(){
+  var root=document.documentElement,
+      menu=document.getElementById('menu'),
+      mask=document.getElementById('mask'),
+      dim=document.getElementById('dim'),
+      toc=document.getElementById('touchToc'),
+      fsVal=document.getElementById('fsVal'),
+      brRange=document.getElementById('brRange'),
+      panels=[].slice.call(document.querySelectorAll('.panel')),
+      btns=[].slice.call(document.querySelectorAll('.bar button'));
+
+  document.querySelectorAll('section').forEach(function(s){
+    var h=s.querySelector('h2 span'); if(!h) return;
+    var parts=h.textContent.replace(/\u3000/g,' ').split(' ');
+    var li=document.createElement('li');
+    li.innerHTML='<a href="#'+s.id+'"><span class="n">'+parts[0]+'</span><span class="s">'+(parts[1]||'')+'</span></a>';
+    toc.appendChild(li);
+  });
+
+  function show(id){
+    panels.forEach(function(p){ p.classList.toggle('on', p.id===id); });
+    btns.forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-pane')===id); });
+  }
+  function open(){ menu.classList.add('on'); mask.classList.add('on'); }
+  function close(){ menu.classList.remove('on'); mask.classList.remove('on'); show(null); }
+
+  btns.forEach(function(b){
+    b.addEventListener('click', function(){
+      var id=b.getAttribute('data-pane');
+      show(document.getElementById(id).classList.contains('on') ? null : id);
+    });
+  });
+  mask.addEventListener('click', close);
+  toc.addEventListener('click', function(e){ if(e.target.closest('a')) close(); });
+
+  var FS_KEY='dy19fs', fs=parseFloat(localStorage.getItem(FS_KEY));
+  if(!fs) fs=parseFloat(getComputedStyle(document.querySelector('p')).fontSize)||17.5;
+  function setFs(v){
+    fs=Math.max(15,Math.min(24,v));
+    root.style.setProperty('--fs',fs.toFixed(1)+'px');
+    fsVal.textContent=fs.toFixed(1);
+    localStorage.setItem(FS_KEY,fs);
+  }
+  document.getElementById('fsUp').addEventListener('click',function(){ setFs(fs+1); });
+  document.getElementById('fsDown').addEventListener('click',function(){ setFs(fs-1); });
+  setFs(fs);
+
+  var BR_KEY='dy19br';
+  function setBr(v){
+    v=Math.max(30,Math.min(100,v));
+    brRange.value=v;
+    dim.style.opacity=((100-v)/100*0.62).toFixed(3);
+    localStorage.setItem(BR_KEY,v);
+  }
+  brRange.addEventListener('input',function(){ setBr(+brRange.value); });
+  setBr(parseFloat(localStorage.getItem(BR_KEY))||92);
+
+  document.addEventListener('click', function(e){
+    if(e.target.closest('.menu')||e.target.closest('#mask')) return;
+    if(e.target.closest('a')) return;
+    if(window.getSelection && String(window.getSelection())) return;
+    if(menu.classList.contains('on')){ close(); return; }
+    var y=e.clientY, h=window.innerHeight;
+    if(y>h*0.2 && y<h*0.8) open();
+  });
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape') close(); });
+})();
+</script>
 </body>
 </html>
